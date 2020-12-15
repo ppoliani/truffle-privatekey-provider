@@ -5,6 +5,7 @@ const WebsocketProvider = require('@trufflesuite/web3-provider-engine/subprovide
 const RpcProvider = require('@trufflesuite/web3-provider-engine/subproviders/rpc');
 const Wallet = require('ethereumjs-wallet').default;
 const NonceSubprovider = require('web3-provider-engine/subproviders/nonce-tracker');
+const Url = require('url')
 
 function PrivateKeyProvider(privateKey, providerUrl) {
   if (!privateKey) {
@@ -29,7 +30,7 @@ function PrivateKeyProvider(privateKey, providerUrl) {
   this.engine.addProvider(new WalletSubprovider(this.wallet, {}));
 
   const providerProtocol = (
-    Url.parse(url).protocol || "http:"
+    Url.parse(providerUrl).protocol || "http:"
   ).toLowerCase();
 
   switch (providerProtocol) {
