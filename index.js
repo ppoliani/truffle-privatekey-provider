@@ -1,7 +1,8 @@
-const ProviderEngine = require("web3-provider-engine");
+const ProviderEngine = require('web3-provider-engine');
 const FiltersSubprovider = require('web3-provider-engine/subproviders/filters');
 const WalletSubprovider = require('web3-provider-engine/subproviders/wallet');
-const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
+const WebsocketProvider = require('@trufflesuite/web3-provider-engine/subproviders/websocket');
+const RpcProvider = require('@trufflesuite/web3-provider-engine/subproviders/rpc');
 const Wallet = require('ethereumjs-wallet').default;
 const NonceSubprovider = require('web3-provider-engine/subproviders/nonce-tracker');
 
@@ -26,7 +27,19 @@ function PrivateKeyProvider(privateKey, providerUrl) {
   this.engine.addProvider(new FiltersSubprovider());
   this.engine.addProvider(new NonceSubprovider());
   this.engine.addProvider(new WalletSubprovider(this.wallet, {}));
-  this.engine.addProvider(new RpcSubprovider({ rpcUrl: providerUrl }));
+
+  const providerProtocol = (
+    Url.parse(url).protocol || "http:"
+  ).toLowerCase();
+
+  switch (providerProtocol) {
+    case "ws:":
+    case "wss:":
+      this.engine.addProvider(new WebsocketProvider({ rpcUrl: providerUrl }));
+      break;
+    default:
+      this.engine.addProvider(new RpcProvider({ rpcUrl: providerUrl }));
+  }
 
   this.engine.start();
 }
